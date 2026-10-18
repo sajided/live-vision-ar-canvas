@@ -2,7 +2,10 @@ import { Eraser, Keyboard, Mic, X } from 'lucide-react'
 import type { PointerEvent } from 'react'
 
 interface ControlBarProps {
+  /** A frame and its answer are on screen. */
   frozen: boolean
+  /** The still is shown while a question is typed (otherwise the camera is live). */
+  holding: boolean
   canCapture: boolean
   canClear: boolean
   speechSupported: boolean
@@ -20,6 +23,7 @@ interface ControlBarProps {
 
 export function ControlBar({
   frozen,
+  holding,
   canCapture,
   canClear,
   speechSupported,
@@ -76,7 +80,7 @@ export function ControlBar({
         <button
           type="button"
           onClick={onResume}
-          aria-label="Resume live view"
+          aria-label={holding ? 'Resume live view' : 'Close answer'}
           className="flex size-18 items-center justify-center rounded-full border-4 border-white bg-white/20 backdrop-blur active:scale-95"
         >
           <X className="size-7" />

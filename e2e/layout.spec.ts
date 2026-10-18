@@ -28,7 +28,7 @@ function overlapRatio(a: Box, b: Box): number {
 
 async function askAbout(page: Page, scenario: string, { voice = false } = {}) {
   // Layout tests run with the tutor voice off so everything appears at once.
-  if (!voice) await page.addInitScript(() => localStorage.setItem('ar-canvas:muted', '1'))
+  if (!voice) await page.addInitScript(() => localStorage.setItem('stepproof:muted', '1'))
   await page.route('**/__e2e/worksheet.jpg', (route) => route.fulfill({ path: FIXTURE, contentType: 'image/jpeg' }))
   await page.goto(`/?image=/__e2e/worksheet.jpg&provider=mock&mock=${scenario}`)
   await page.getByRole('button', { name: 'Capture frame' }).click()
@@ -91,11 +91,13 @@ for (const scenario of SCENARIOS) {
   })
 }
 
-test('question bar hides after asking and resume clears the answer', async ({ page }) => {
+test('question bar hides after asking, the camera goes live, and close clears the answer', async ({ page }) => {
   await askAbout(page, 'geometry')
   await expect(page.getByTestId('query-bar')).toBeHidden()
   await expect(page.getByRole('button', { name: 'Ask a follow-up question' })).toBeVisible()
-  await page.getByRole('button', { name: 'Resume live view' }).click()
+  // The held still is gone: the answer is drawn over the live view.
+  await expect(page.locator('canvas')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Close answer' }).click()
   await expect(page.locator('[data-overlay]')).toHaveCount(0)
 })
 

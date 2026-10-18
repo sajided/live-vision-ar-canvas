@@ -1,4 +1,4 @@
-# Live Vision AR Canvas
+# StepProof
 
 Mobile-first AR **math tutor** (see `product_requirement_document.md`). Point the camera at a math problem, ask by voice (hold the mic) or by typing after the shutter, and Gemma's worked solution streams in over the photo: geometry traced on the figure (polygons, circles, angle marks, length labels), step-by-step formulas (KaTeX), and mini whiteboard diagrams for things not in view.
 

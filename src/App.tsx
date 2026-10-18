@@ -50,6 +50,14 @@ export default function App() {
   const speech = useSpeechRecognition()
   const [frame, setFrame] = useState<CapturedFrame | null>(null)
   const frameRef = useRef<CapturedFrame | null>(null)
+  // The still is shown only while a question is being typed after the shutter; once asked,
+  // the live camera runs again under the drawings.
+  const [holding, setHolding] = useState(false)
+  const holdingRef = useRef(false)
+  const hold = (value: boolean) => {
+    holdingRef.current = value
+    setHolding(value)
+  }
   const [capturing, setCapturing] = useState(false)
   const [query, setQuery] = useState('')
   // The question bar covers the bottom of the answer, so it's only open while typing.
@@ -109,9 +117,9 @@ export default function App() {
     return () => URL.revokeObjectURL(frame.previewUrl)
   }, [frame])
 
-  /** Freeze on the current camera frame, or reuse the frame already frozen. */
+  /** Capture the current camera frame, or reuse the one held on screen while typing. */
   async function freeze(): Promise<CapturedFrame | null> {
-    if (frameRef.current) return frameRef.current
+    if (holdingRef.current && frameRef.current) return frameRef.current
     const video = stillImageUrl ? still.imageRef.current : videoRef.current
     if (!video || status !== 'live') return null
     setCapturing(true)
@@ -143,6 +151,8 @@ export default function App() {
       return
     }
     setQueryOpen(false)
+    // Back to the live camera; the answer is drawn over it.
+    hold(false)
     dismissToast()
     const { error: requestError, summary, shown, truncated } = await annotations.request(target, text)
     if (requestError) {
@@ -155,7 +165,10 @@ export default function App() {
   }
 
   async function handleCapture() {
-    if (await freeze()) setQueryOpen(true)
+    if (!(await freeze())) return
+    // Hold the still while the question is typed, so aiming and typing don't fight.
+    hold(true)
+    setQueryOpen(true)
   }
 
   async function handleTalkEnd() {
@@ -172,8 +185,10 @@ export default function App() {
     void ask(captured, text)
   }
 
-  function handleSubmit(text: string) {
-    if (frame) void ask(frame, text)
+  async function handleSubmit(text: string) {
+    // A follow-up asked over the live camera is about what it sees now.
+    const target = await freeze()
+    if (target) void ask(target, text)
   }
 
   function retake() {
@@ -184,6 +199,7 @@ export default function App() {
   }
 
   function handleResume() {
+    hold(false)
     annotations.reset()
     speech.cancel()
     frameRef.current = null
@@ -201,7 +217,7 @@ export default function App() {
         onImageLoad={still.onLoad}
         onImageError={still.onError}
       />
-      {frame && <FrozenFrame still={frame.still} />}
+      {frame && holding && <FrozenFrame still={frame.still} />}
       {frame && (
         <OverlayRenderer
           elements={annotations.elements}
@@ -238,6 +254,7 @@ export default function App() {
       </AnimatePresence>
       <ControlBar
         frozen={frame !== null}
+        holding={holding}
         canCapture={status === 'live' && !capturing}
         canClear={annotations.visible.length > 0}
         speechSupported={speech.supported}

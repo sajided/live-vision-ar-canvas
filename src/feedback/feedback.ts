@@ -3,7 +3,7 @@
  * haptics use navigator.vibrate, which Android supports and iOS Safari does not.
  */
 
-const MUTE_KEY = 'ar-canvas:muted'
+const MUTE_KEY = 'stepproof:muted'
 
 let ctx: AudioContext | null = null
 let muted = readMuted()
