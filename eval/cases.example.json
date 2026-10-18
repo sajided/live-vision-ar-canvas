@@ -1,0 +1,10 @@
+[
+  {
+    "image": "images/arduino-uno.jpg",
+    "query": "Where is the USB port and the reset button?",
+    "targets": [
+      { "label": "USB port", "box": { "x": 4, "y": 43, "width": 23, "height": 23 } },
+      { "label": "Reset button", "box": { "x": 8, "y": 41, "width": 7, "height": 9 } }
+    ]
+  }
+]
