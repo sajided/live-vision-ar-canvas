@@ -1,5 +1,5 @@
 import type { Size } from '../camera/geometry'
-import { overlapArea, segmentIntersectsRect, SEGMENT_PENALTY, type Insets, type Rect, type Segment } from './layout'
+import { nearestPoint, overlapArea, segmentIntersectsRect, SEGMENT_PENALTY, type Insets, type Rect, type Segment } from './layout'
 import type { PxPoint } from './project'
 
 /**
@@ -37,7 +37,9 @@ const DIRECTIONS: PxPoint[] = [
 ]
 const OUT_OF_BOUNDS_WEIGHT = 50
 /** Small cost per candidate rank so free spots prefer the earlier directions. */
-const RANK_COST = 4
+const RANK_COST = 2
+/** Cost per px a label ends up from its point, so clamped spots are a fallback, not a preference. */
+const DRIFT_COST = 0.5
 
 /** Rough rendered width of a bold label, without measuring the DOM. */
 export function estimateTextWidth(text: string, fontSize: number): number {
@@ -54,6 +56,17 @@ function rectAround(anchor: PxPoint, dir: PxPoint, gap: number, width: number, h
   const cx = anchor.x + ux * reach
   const cy = anchor.y + uy * reach
   return { left: cx - width / 2, top: cy - height / 2, width, height }
+}
+
+/** Shift a rect the least distance needed to sit inside the free area. */
+function clampInto(rect: Rect, screen: Size, insets: Insets): Rect {
+  const maxLeft = screen.width - insets.right - rect.width
+  const maxTop = screen.height - insets.bottom - rect.height
+  return {
+    ...rect,
+    left: Math.min(Math.max(rect.left, insets.left), Math.max(insets.left, maxLeft)),
+    top: Math.min(Math.max(rect.top, insets.top), Math.max(insets.top, maxTop)),
+  }
 }
 
 function outOfBounds(rect: Rect, screen: Size, insets: Insets): number {
@@ -82,12 +95,22 @@ export function layoutLabels(
     ]
     let best: Rect | null = null
     let bestScore = Infinity
-    candidates.forEach((dir, rank) => {
+    // Each direction as-is, then pushed back inside the free area (for anchors under the dock or near an edge).
+    const rects = candidates.flatMap((dir) => {
       const rect = rectAround(label.anchor, dir, label.gap, label.width, label.height)
+      return [rect, clampInto(rect, screen, insets)]
+    })
+    rects.forEach((rect, rank) => {
       const overlap = [...obstacles, ...placed.values()].reduce((sum, other) => sum + overlapArea(rect, other), 0)
       const crossings = segments.filter((s) => segmentIntersectsRect(s, rect)).length
+      const near = nearestPoint(rect, label.anchor)
+      const drift = Math.max(0, Math.hypot(near.x - label.anchor.x, near.y - label.anchor.y) - label.gap)
       const score =
-        overlap * 10 + crossings * SEGMENT_PENALTY + outOfBounds(rect, screen, insets) * OUT_OF_BOUNDS_WEIGHT + rank * RANK_COST
+        overlap * 10 +
+        crossings * SEGMENT_PENALTY +
+        outOfBounds(rect, screen, insets) * OUT_OF_BOUNDS_WEIGHT +
+        rank * RANK_COST +
+        drift * DRIFT_COST
       if (score < bestScore) {
         best = rect
         bestScore = score

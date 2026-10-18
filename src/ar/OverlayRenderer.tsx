@@ -8,7 +8,9 @@ import type { CapturedFrame } from '../types/frame'
 import { beaconLabelId, estimateTextWidth, layoutLabels, vertexLabelId, type LabelRequest } from './labels'
 import { cardWidth, layoutCards, nearestPoint, squareAround, type Rect, type Segment } from './layout'
 import { frameToScreen, type PxPoint } from './project'
-import { isCard, registry } from './registry'
+import { isCard, isStep, registry } from './registry'
+import { NO_DOCK, type DockBox } from './dockBox'
+import { StepDock } from './StepDock'
 import type { ARElement, Point } from './schema'
 
 const CARD_OFFSET = 20
@@ -118,27 +120,43 @@ export function OverlayRenderer({ elements, visible, delays, frame, screen, onDi
     [frame, screen],
   )
 
-  // Labels first (they're tied to points), then cards flow around labels, dots and lines.
+  const [dock, setDock] = useState<DockBox>(NO_DOCK)
+  const [currentStep, setCurrentStep] = useState<string | null>(null)
+  const steps = useMemo(() => visible.filter(isCard).filter(isStep), [visible])
+
+  // Labels first (they're tied to points), then floating cards flow around labels, dots and lines.
+  // Everything keeps clear of the step dock.
   const { labelRects, placements } = useMemo(() => {
-    const { segments, dots, labels } = sceneGeometry(elements, project)
-    const labelRects = layoutLabels(labels, dots, segments, screen, LABEL_INSETS)
-    const cards = elements
+    // Above the controls the dock spans the width, so it shrinks the free area; beside the
+    // photo it's just a box to avoid.
+    const bottomDock = dock.height > 0 && !dock.side
+    const dockInset = (base: typeof LABEL_INSETS) =>
+      bottomDock ? { ...base, bottom: base.bottom + dock.height + 8 } : base
+    const dockObstacles: Rect[] =
+      dock.height > 0 && dock.side
+        ? [{ left: dock.left - 8, top: dock.top - 8, width: dock.width + 16, height: dock.height + 16 }]
+        : []
+    const { segments, dots: pointDots, labels } = sceneGeometry(elements, project)
+    const dots = [...pointDots, ...dockObstacles]
+    const labelRects = layoutLabels(labels, dots, segments, screen, dockInset(LABEL_INSETS))
+    const floating = elements
       .filter(isCard)
+      .filter((el) => !isStep(el))
       .map((el) => ({ id: el.id, anchor: project(el.position), height: heights[el.id] ?? CARD_HEIGHT_ESTIMATE }))
-    const placements = layoutCards(cards, [...dots, ...labelRects.values()], screen, {
+    const placements = layoutCards(floating, [...dots, ...labelRects.values()], screen, {
       width: cardWidth(screen),
-      insets: CARD_INSETS,
+      insets: dockInset(CARD_INSETS),
       offset: CARD_OFFSET,
       segments,
     })
     return { labelRects, placements }
-  }, [elements, heights, project, screen])
+  }, [elements, heights, project, screen, dock])
 
   const delayOf = (id: string) => delays[id] ?? 0
 
   const render = (layer: 'svg' | 'html') =>
     visible
-      .filter((element) => registry[element.type].layer === layer)
+      .filter((element) => registry[element.type].layer === layer && !isStep(element))
       .map((element) => {
         const Component = registry[element.type].component as ComponentType<OverlayElementProps<ARElement>>
         return (
@@ -157,7 +175,7 @@ export function OverlayRenderer({ elements, visible, delays, frame, screen, onDi
       })
 
   const leaders = visible.flatMap((el) => {
-    const rect = isCard(el) ? placements.get(el.id) : undefined
+    const rect = isCard(el) && !isStep(el) ? placements.get(el.id) : undefined
     if (!rect || !isCard(el)) return []
     const anchor = project(el.position)
     const end = nearestPoint(rect, anchor)
@@ -185,6 +203,9 @@ export function OverlayRenderer({ elements, visible, delays, frame, screen, onDi
     )
   })
 
+  const current = steps.find((s) => s.id === currentStep)
+  const pulseAt = current ? project(current.position) : null
+
   return (
     <OverlayRoot
       size={screen}
@@ -192,10 +213,39 @@ export function OverlayRenderer({ elements, visible, delays, frame, screen, onDi
         <AnimatePresence>
           {render('svg')}
           {leaders}
+          {pulseAt && (
+            // Shows where on the photo the step in the dock applies.
+            <motion.circle
+              key={`pulse-${currentStep}`}
+              cx={pulseAt.x}
+              cy={pulseAt.y}
+              fill="none"
+              stroke="white"
+              strokeWidth={2}
+              initial={{ r: 8, opacity: 0.9 }}
+              animate={{ r: 26, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.4, repeat: Infinity, ease: 'easeOut' }}
+            />
+          )}
         </AnimatePresence>
       }
     >
       <AnimatePresence>{render('html')}</AnimatePresence>
+      <AnimatePresence>
+        {steps.length > 0 && (
+          <StepDock
+            key="dock"
+            steps={steps}
+            delays={delays}
+            project={project}
+            screen={screen}
+            onDismissAll={(ids) => ids.forEach(onDismiss)}
+            onCurrentChange={setCurrentStep}
+            onSize={setDock}
+          />
+        )}
+      </AnimatePresence>
     </OverlayRoot>
   )
 }

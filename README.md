@@ -38,6 +38,7 @@ Phones must use the `https://<lan-ip>` URL and accept the certificate, because c
 - **LaTeX in JSON**: Gemma often emits `"7\\text{ m"}` (quote before the brace); the stream parser moves the brace back inside the string when the next token shows another field follows.
 - **Freeze stabilization**: the shutter freezes the sharpest of a ~130 ms burst (Laplacian variance) and warns about blurry/dark frames with a Retake action.
 - **Feedback**: synthesized WebAudio cues (shutter, mic, first overlay, steps, error) with a mute toggle; `navigator.vibrate` haptics on Android (iOS Safari has no vibration API); shutter flash; scan sweep while waiting.
+- **Step dock**: numbered steps and diagrams are read one at a time in a dock above the controls (beside the photo in landscape) with paging and swipe; a pulsing ring marks where the current step applies, so the traced figure stays uncovered.
 - **Accessibility**: `prefers-reduced-motion` skips pen pacing and transform animations.
 - **Bundle**: KaTeX loads on demand (prefetched at capture), keeping the first load at ~160 KB gzipped.
 - **Variants**: `PROMPT_VARIANT=full|compact`, `GEMMA_MODEL`, frame size — compare with `pnpm gemma:eval <cases.json> --images <dir> --pause 5000`; results in `docs/benchmarks.md`.

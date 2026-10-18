@@ -3,13 +3,14 @@ import { FitTex } from '../math/FitTex'
 import { CardShell } from './CardShell'
 import type { OverlayElementProps } from './types'
 
-export function Formula({ element, delay, onDismiss, placement, onMeasure }: OverlayElementProps<FormulaElement>) {
+export function Formula({ element, delay, onDismiss, placement, onMeasure, docked }: OverlayElementProps<FormulaElement>) {
   return (
     <CardShell
       id={element.id}
       delay={delay}
       placement={placement}
       onMeasure={onMeasure}
+      docked={docked}
       onDismiss={onDismiss}
       dismissLabel="Dismiss formula"
       stepIndex={element.stepIndex}

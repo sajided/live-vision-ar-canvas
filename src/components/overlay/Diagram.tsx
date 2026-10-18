@@ -122,7 +122,7 @@ function BoardShapeView({ shape, delay }: { shape: BoardShape; delay: number }) 
   }
 }
 
-export function Diagram({ element, delay, onDismiss, placement, onMeasure }: OverlayElementProps<DiagramElement>) {
+export function Diagram({ element, delay, onDismiss, placement, onMeasure, docked }: OverlayElementProps<DiagramElement>) {
   const offsets = boardShapeOffsets(element.shapes)
   const shapeDelay = (i: number) => delay + offsets[i]
   return (
@@ -131,12 +131,13 @@ export function Diagram({ element, delay, onDismiss, placement, onMeasure }: Ove
       delay={delay}
       placement={placement}
       onMeasure={onMeasure}
+      docked={docked}
       onDismiss={onDismiss}
       dismissLabel="Dismiss diagram"
       stepIndex={element.stepIndex}
       title={element.title}
     >
-      <div className="relative mt-2 aspect-square w-full">
+      <div className="relative mx-auto mt-2 aspect-square" style={{ width: 'min(100%, 34dvh)' }}>
         <div className="absolute inset-4">
           <svg viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible" aria-hidden>
             {element.shapes.map((shape, i) => (

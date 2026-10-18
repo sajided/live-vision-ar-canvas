@@ -14,6 +14,8 @@ interface CardShellProps {
   stepIndex?: number
   title?: ReactNode
   children: ReactNode
+  /** Inside the step dock: static layout, no own dismiss button (the dock has one). */
+  docked?: boolean
 }
 
 /** Frosted, dismissible card positioned by the renderer's collision-aware layout. */
@@ -27,6 +29,7 @@ export function CardShell({
   stepIndex,
   title,
   children,
+  docked = false,
 }: CardShellProps) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -34,6 +37,15 @@ export function CardShell({
   useLayoutEffect(() => {
     if (ref.current) onMeasure?.(id, ref.current.offsetHeight)
   })
+
+  if (docked) {
+    return (
+      <div role="note" data-overlay="card" className={`text-white ${HALO}`}>
+        <CardTitle stepIndex={stepIndex} title={title} />
+        {children}
+      </div>
+    )
+  }
 
   if (!placement) return null
 
@@ -49,18 +61,7 @@ export function CardShell({
       exit={{ opacity: 0, y: 8, transition: { duration: 0.15 } }}
       transition={{ duration: 0.35, ease: 'easeOut', delay }}
     >
-      {(title !== undefined || stepIndex !== undefined) && (
-        <div className="flex min-h-6 items-center gap-2 pr-7">
-          {stepIndex !== undefined && (
-            <span
-              className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-black shadow-md [text-shadow:none] ${RAINBOW_BG[(stepIndex - 1) % RAINBOW_BG.length]}`}
-            >
-              {stepIndex}
-            </span>
-          )}
-          {title !== undefined && <h2 className="text-[15px] leading-snug font-bold">{title}</h2>}
-        </div>
-      )}
+      <CardTitle stepIndex={stepIndex} title={title} />
       {children}
       <button
         type="button"
@@ -71,5 +72,21 @@ export function CardShell({
         <X className="size-4" />
       </button>
     </motion.div>
+  )
+}
+
+function CardTitle({ stepIndex, title }: { stepIndex?: number; title?: ReactNode }) {
+  if (title === undefined && stepIndex === undefined) return null
+  return (
+    <div className="flex min-h-6 items-center gap-2 pr-7">
+      {stepIndex !== undefined && (
+        <span
+          className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-black shadow-md [text-shadow:none] ${RAINBOW_BG[(stepIndex - 1) % RAINBOW_BG.length]}`}
+        >
+          {stepIndex}
+        </span>
+      )}
+      {title !== undefined && <h2 className="text-[15px] leading-snug font-bold">{title}</h2>}
+    </div>
   )
 }

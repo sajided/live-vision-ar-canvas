@@ -72,6 +72,7 @@ export interface LayoutOptions {
 }
 
 const ANCHOR_SIZE = 24
+const GRID_STEP_X = 32
 
 export const cardWidth = (screen: Size) => Math.min(288, screen.width * 0.8)
 
@@ -125,6 +126,10 @@ export function layoutCards(
     ]
     for (let top = minTop; top <= maxTop; top += step) {
       positions.push([x - offset, top], [x - width + offset, top])
+    }
+    // Coarse grid over the whole free area, for crowded or short (landscape) screens.
+    for (let top = minTop; top <= maxTop; top += step * 2) {
+      for (let left = minLeft; left <= maxLeft; left += GRID_STEP_X) positions.push([left, top])
     }
 
     let best: Rect | null = null

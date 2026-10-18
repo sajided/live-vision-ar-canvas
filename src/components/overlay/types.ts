@@ -17,4 +17,6 @@ export interface OverlayElementProps<E> {
   onMeasure?: (id: string, height: number) => void
   /** Collision-free boxes for point labels, keyed by beaconLabelId / vertexLabelId. */
   labelRects?: ReadonlyMap<string, Rect>
+  /** Rendered inside the step dock instead of floating at `placement` (cards only). */
+  docked?: boolean
 }

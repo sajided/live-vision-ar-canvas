@@ -39,3 +39,8 @@ export type CardElement = Extract<ARElement, { type: 'InfoCard' | 'Formula' | 'D
 export function isCard(element: ARElement): element is CardElement {
   return registry[element.type].card
 }
+
+/** Numbered steps and diagrams are read in sequence, so they live in the step dock. */
+export function isStep(element: ARElement): boolean {
+  return isCard(element) && (element.type === 'Diagram' || element.stepIndex !== undefined)
+}
