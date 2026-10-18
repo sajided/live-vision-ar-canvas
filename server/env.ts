@@ -2,7 +2,8 @@ import 'dotenv/config'
 import { z } from 'zod'
 
 const EnvSchema = z.object({
-  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is missing; add it to .env'),
+  // Optional at load so a deployment without it still answers /api/health and explains what's missing.
+  GEMINI_API_KEY: z.string().optional(),
   GEMMA_MODEL: z.string().default('gemma-4-26b-a4b-it'),
   // JSON mime type only: Gemma rejects responseJsonSchema with a 400.
   GEMMA_JSON_MODE: z

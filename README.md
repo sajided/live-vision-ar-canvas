@@ -30,6 +30,16 @@ Phones must use the `https://<lan-ip>` URL and accept the certificate, because c
 
 `captureFrame` encodes only what the viewfinder shows (the `object-fit: cover` crop), letterboxed into a 768×768 square. `frame.contentRect` records where that content sits inside the square (0–100). Use `imageToViewport` / `viewportToImage` from `src/camera/geometry.ts` to convert model coordinates to screen percentages.
 
+## Deploy (Vercel)
+
+The Vite site is served statically and `api/index.ts` runs the same Hono API as a Vercel Function (`vercel.json` rewrites `/api/*` to it, 60 s max duration).
+
+1. Import the repo in Vercel (framework preset: Vite).
+2. In **Settings → Environment Variables** add `GEMINI_API_KEY` and, for the tutor voice, `ELEVENLABS_API_KEY` (optionally `ELEVENLABS_VOICE_ID`, `GEMMA_MODEL`). Redeploy after adding them.
+3. Check `https://<your-app>.vercel.app/api/health` — it should report `"gemini": true` (and `"tts": true` with an ElevenLabs key).
+
+Frames uploaded early may land on a different function instance than the question; the client then re-sends the image inline automatically.
+
 ## Tutor voice (ElevenLabs)
 
 Gemma writes a spoken line (`say`) for each element, like a tutor talking through the problem. The app reveals one element at a time, drawing it while the line is spoken, and moves on only when both are done; subtitles show what's being said.

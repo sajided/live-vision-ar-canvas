@@ -3,7 +3,9 @@ import type { PctRect } from '../src/camera/geometry'
 import { env } from './env'
 import { buildSystemInstruction, buildUserPrompt } from './prompt'
 
-const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY })
+let client: GoogleGenAI | null = null
+const ai = () => (client ??= new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }))
+export const geminiConfigured = () => Boolean(env.GEMINI_API_KEY)
 const systemInstruction = buildSystemInstruction(env.PROMPT_VARIANT)
 
 /** Filled in while streaming, for timings and truncation detection. */
@@ -36,7 +38,7 @@ export async function* streamGemma(req: GemmaRequest): AsyncIterable<string> {
   }
   if (req.jsonMode ?? env.GEMMA_JSON_MODE) config.responseMimeType = 'application/json'
 
-  const stream = await ai.models.generateContentStream({
+  const stream = await ai().models.generateContentStream({
     model: env.GEMMA_MODEL,
     contents: [
       {
@@ -66,7 +68,7 @@ export async function* streamGemma(req: GemmaRequest): AsyncIterable<string> {
 export async function warmUp(): Promise<void> {
   const start = performance.now()
   try {
-    await ai.models.generateContent({
+    await ai().models.generateContent({
       model: env.GEMMA_MODEL,
       contents: 'Reply with OK.',
       config: { maxOutputTokens: 4, thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL } },
