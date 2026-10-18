@@ -74,7 +74,9 @@ export interface LayoutOptions {
 const ANCHOR_SIZE = 24
 const GRID_STEP_X = 32
 
-export const cardWidth = (screen: Size) => Math.min(288, screen.width * 0.8)
+/** Floating card width: roomy in portrait, narrower in landscape so cards fit beside things. */
+export const cardWidth = (screen: Size) =>
+  screen.width > screen.height ? Math.min(340, screen.width * 0.38) : Math.min(360, screen.width * 0.85)
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), Math.max(min, max))
 

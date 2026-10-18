@@ -16,9 +16,12 @@ export const PointSchema = z.strictObject({ x: PctSchema, y: PctSchema })
 export const ColorSchema = z.enum(['blue', 'green', 'amber', 'red', 'violet', 'white']).default('blue')
 
 const IdSchema = z.string().min(1).max(40)
+/** What the tutor says aloud when this element appears (plain words, no LaTeX). */
+const SaySchema = z.string().min(1).max(240).optional()
 
 export const TargetBeaconSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('TargetBeacon'),
   position: PointSchema,
   label: z.string().min(1).max(40),
@@ -27,6 +30,7 @@ export const TargetBeaconSchema = z.strictObject({
 
 export const ConnectorLineSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('ConnectorLine'),
   from: PointSchema,
   to: PointSchema,
@@ -36,6 +40,7 @@ export const ConnectorLineSchema = z.strictObject({
 
 export const InfoCardSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('InfoCard'),
   position: PointSchema,
   title: z.string().min(1).max(60),
@@ -52,6 +57,7 @@ const TagSchema = z.string().min(1).max(12)
 
 export const FormulaSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('Formula'),
   position: PointSchema,
   latex: LatexSchema(300),
@@ -62,6 +68,7 @@ export const FormulaSchema = z.strictObject({
 /** Small formula drawn directly on the photo, e.g. a side length. */
 export const MathLabelSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('MathLabel'),
   position: PointSchema,
   latex: LatexSchema(80),
@@ -73,6 +80,7 @@ const VertexLabelsSchema = z.array(TagSchema).max(12).optional()
 
 export const PolygonSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('Polygon'),
   points: z.array(PointSchema).min(2).max(12),
   labels: VertexLabelsSchema,
@@ -83,6 +91,7 @@ export const PolygonSchema = z.strictObject({
 
 export const CircleSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('Circle'),
   center: PointSchema,
   /** Percentage of the image side. */
@@ -92,6 +101,7 @@ export const CircleSchema = z.strictObject({
 
 export const AngleSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('Angle'),
   vertex: PointSchema,
   /** Points on each ray; the smaller angle between them is marked. */
@@ -136,6 +146,7 @@ const BoardShapeSchema = z.discriminatedUnion('kind', [
 /** A small whiteboard card: draws a figure that isn't in the photo. */
 export const DiagramSchema = z.strictObject({
   id: IdSchema,
+  say: SaySchema,
   type: z.literal('Diagram'),
   position: PointSchema,
   title: z.string().max(60).optional(),

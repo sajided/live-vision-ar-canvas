@@ -14,6 +14,10 @@ const EnvSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  // Text-to-speech for the tutor voice; without a key the browser's built-in voice is used.
+  ELEVENLABS_API_KEY: z.string().optional(),
+  ELEVENLABS_VOICE_ID: z.string().default('JBFqnCBsd6RMkjVDRZzb'),
+  ELEVENLABS_MODEL: z.string().default('eleven_flash_v2_5'),
   PROMPT_VARIANT: z.enum(['full', 'compact']).default('full'),
   PORT: z.coerce.number().int().default(8787),
 })

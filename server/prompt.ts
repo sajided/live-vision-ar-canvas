@@ -10,20 +10,20 @@ export const MODEL_GRID = 1000
 const EXAMPLE = {
   elements: [
     {
-      id: 'tri',
+      id: 'tri', say: "Let's look at this right triangle. I'll trace it so we can name its corners A, B and C.",
       type: 'Polygon',
       points: [{ x: 250, y: 680 }, { x: 750, y: 680 }, { x: 250, y: 380 }],
       labels: ['A', 'B', 'C'],
       fill: true,
       color: 'amber',
     },
-    { id: 'right', type: 'Angle', vertex: { x: 250, y: 680 }, from: { x: 750, y: 680 }, to: { x: 250, y: 380 }, right: true, color: 'white' },
-    { id: 'a', type: 'MathLabel', position: { x: 190, y: 530 }, latex: 'a = 3', color: 'amber' },
-    { id: 'b', type: 'MathLabel', position: { x: 500, y: 730 }, latex: 'b = 4', color: 'amber' },
-    { id: 'c', type: 'MathLabel', position: { x: 550, y: 490 }, latex: 'c = ?', color: 'violet' },
-    { id: 's1', type: 'Formula', position: { x: 550, y: 490 }, latex: 'c^2 = a^2 + b^2', caption: 'Pythagorean theorem', stepIndex: 1 },
-    { id: 's2', type: 'Formula', position: { x: 550, y: 490 }, latex: 'c^2 = 3^2 + 4^2 = 25', caption: 'Substitute the legs', stepIndex: 2 },
-    { id: 's3', type: 'Formula', position: { x: 550, y: 490 }, latex: 'c = \\sqrt{25} = 5', caption: 'Take the square root', stepIndex: 3 },
+    { id: 'right', say: 'This little square tells us the angle at A is ninety degrees.', type: 'Angle', vertex: { x: 250, y: 680 }, from: { x: 750, y: 680 }, to: { x: 250, y: 380 }, right: true, color: 'white' },
+    { id: 'a', say: 'One leg is 3 long,', type: 'MathLabel', position: { x: 190, y: 530 }, latex: 'a = 3', color: 'amber' },
+    { id: 'b', say: 'the other leg is 4,', type: 'MathLabel', position: { x: 500, y: 730 }, latex: 'b = 4', color: 'amber' },
+    { id: 'c', say: "and the side across from the right angle, the hypotenuse, is what we're looking for.", type: 'MathLabel', position: { x: 550, y: 490 }, latex: 'c = ?', color: 'violet' },
+    { id: 's1', say: 'For any right triangle, c squared equals a squared plus b squared.', type: 'Formula', position: { x: 550, y: 490 }, latex: 'c^2 = a^2 + b^2', caption: 'Pythagorean theorem', stepIndex: 1 },
+    { id: 's2', say: 'Put in our legs: 3 squared is 9, 4 squared is 16, and together that makes 25.', type: 'Formula', position: { x: 550, y: 490 }, latex: 'c^2 = 3^2 + 4^2 = 25', caption: 'Substitute the legs', stepIndex: 2 },
+    { id: 's3', say: 'The square root of 25 is 5, so the hypotenuse is 5.', type: 'Formula', position: { x: 550, y: 490 }, latex: 'c = \\sqrt{25} = 5', caption: 'Take the square root', stepIndex: 3 },
   ],
   summary: 'The hypotenuse is 5.',
 }
@@ -42,6 +42,7 @@ Coordinates: integers 0–${MODEL_GRID} over the whole square image, origin top-
 Elements (no other fields; colors blue|green|amber|red|violet|white):
 Polygon {id,type,points[2-12],labels?[vertex names],closed,fill,color} · Circle {id,type,center,radius,color} · Angle {id,type,vertex,from,to,label?,right,color} · MathLabel {id,type,position,latex≤80,color} · ConnectorLine {id,type,from,to,variant:solid|dashed|arrow,color} · TargetBeacon {id,type,position,label≤40,color}
 Cards: Formula {id,type,position,latex≤300,caption?,stepIndex?} · InfoCard {id,type,position,title≤60,body≤280,stepIndex?} · Diagram {id,type,position,title?,caption?,stepIndex?,shapes:[{kind:polygon|circle|segment|angle|point|label,...same fields}]}
+Tutor voice: give most elements "say" (≤240 chars): spoken, warm, math in words (no LaTeX), explain why; first introduces, last states the answer.
 Rules: geometry → trace with Polygon (+labels A,B,C), Angle marks, MathLabel lengths, dashed ConnectorLine helpers, then Formula steps. Algebra → one Formula per step with a caption. ≤14 elements, drawings first. Formula latex is math only (no sentences); valid KaTeX, no $, escape backslashes for JSON.
 Example: ${JSON.stringify(EXAMPLE)}`
 }
@@ -75,8 +76,11 @@ Cards (placed near "position" automatically, never overlapping):
   { "kind": "polygon", "points", "labels"?, "closed", "fill", "color" } | { "kind": "circle", "center", "radius", "color" } | { "kind": "segment", "from", "to", "variant", "color" } | { "kind": "angle", "vertex", "from", "to", "label"?, "right", "color" } | { "kind": "point", "position", "label"?: short text, "color" } | { "kind": "label", "position", "latex", "color" }
 - InfoCard: a sentence of explanation. { "id", "type": "InfoCard", "position", "title" (max 60), "body" (max 280), "stepIndex"? }
 Colors: "blue" | "green" | "amber" | "red" | "violet" | "white".
+Every element may also have "say": what you say aloud as it appears (max 240 chars).
 
 HOW TO TEACH
+- You are a warm, patient tutor talking the student through it. The app draws each element while speaking its "say", then waits before the next, so the elements are your lesson in order.
+- Give most elements a "say": one or two short spoken sentences, conversational ("Let's...", "Notice...", "So..."). Speak math in words ("x squared", "the square root of 25", "3 over 4"); never LaTeX or symbols in "say". Explain why, not just what. The first element introduces the problem; the last says the answer clearly.
 - Geometry in the photo: trace it with Polygon/Circle and name its vertices with "labels" (use the letters printed in the photo, otherwise A, B, C...). Mark angles with Angle (right: true for 90°), label known and unknown lengths with MathLabel next to each side, then solve with Formula steps.
 - Draw helper lines you introduce (heights, medians, radii, diagonals, extensions) as ConnectorLine with variant "dashed".
 - Algebra/arithmetic: one Formula per step of working, in order, with a short caption saying what was done.

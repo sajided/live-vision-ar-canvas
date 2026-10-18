@@ -26,7 +26,9 @@ function overlapRatio(a: Box, b: Box): number {
   return (w * h) / Math.min(a.width * a.height, b.width * b.height)
 }
 
-async function askAbout(page: Page, scenario: string) {
+async function askAbout(page: Page, scenario: string, { voice = false } = {}) {
+  // Layout tests run with the tutor voice off so everything appears at once.
+  if (!voice) await page.addInitScript(() => localStorage.setItem('ar-canvas:muted', '1'))
   await page.route('**/__e2e/worksheet.jpg', (route) => route.fulfill({ path: FIXTURE, contentType: 'image/jpeg' }))
   await page.goto(`/?image=/__e2e/worksheet.jpg&provider=mock&mock=${scenario}`)
   await page.getByRole('button', { name: 'Capture frame' }).click()
@@ -95,4 +97,28 @@ test('question bar hides after asking and resume clears the answer', async ({ pa
   await expect(page.getByRole('button', { name: 'Ask a follow-up question' })).toBeVisible()
   await page.getByRole('button', { name: 'Resume live view' }).click()
   await expect(page.locator('[data-overlay]')).toHaveCount(0)
+})
+
+test('tutor voice walks through the lesson with subtitles', async ({ page }) => {
+  // No ElevenLabs in tests: report it unconfigured and make the browser voice finish instantly.
+  await page.route('**/api/health', (route) => route.fulfill({ json: { ok: true, tts: false } }))
+  await page.addInitScript(() => {
+    // WebKit in Playwright has no speechSynthesis; the app then paces lines by reading time.
+    if (!('speechSynthesis' in window)) return
+    window.speechSynthesis.speak = (utterance: SpeechSynthesisUtterance) => {
+      setTimeout(() => utterance.onend?.(new Event("end") as SpeechSynthesisEvent), 1000)
+    }
+  })
+  await page.route('**/__e2e/worksheet.jpg', (route) => route.fulfill({ path: FIXTURE, contentType: 'image/jpeg' }))
+  await page.goto('/?image=/__e2e/worksheet.jpg&provider=mock&mock=geometry')
+  await page.getByRole('button', { name: 'Capture frame' }).click()
+  const bar = page.getByTestId('query-bar')
+  await bar.getByRole('textbox').fill('Solve this')
+  await bar.getByRole('button', { name: 'Ask' }).click()
+
+  // The opening line is spoken (and subtitled) while the triangle is drawn.
+  await expect(page.getByText("Let's look at this right triangle", { exact: false })).toBeVisible({ timeout: 10_000 })
+  // …and the lesson reaches the final step.
+  await expect(page.getByText('The square root of 25 is 5', { exact: false })).toBeVisible({ timeout: 45_000 })
+  await expect(page.getByRole('button', { name: 'Go to step 3' })).toBeVisible()
 })

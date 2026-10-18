@@ -16,7 +16,7 @@ export function Formula({ element, delay, onDismiss, placement, onMeasure, docke
       stepIndex={element.stepIndex}
       title={element.caption}
     >
-      <FitTex latex={element.latex} size={19} className="mt-1" />
+      <FitTex latex={element.latex} size={26} className="mt-1" />
     </CardShell>
   )
 }

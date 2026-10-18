@@ -9,6 +9,7 @@ import { env } from './env'
 import { FrameCache } from './frameCache'
 import { streamGemma, warmUp, type GemmaMeta } from './gemma'
 import { RateLimiter } from './rateLimit'
+import { MAX_SPEECH_CHARS, SpeechError, synthesize, ttsEnabled } from './speech'
 import { retryBeforeFirstChunk } from './upstream'
 
 const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024
@@ -24,6 +25,7 @@ const ContentRectSchema = z.strictObject({ x: Pct, y: Pct, width: Pct, height: P
 const frames = new FrameCache({ ttlMs: 2 * 60_000, maxEntries: 200, maxBytes: 100 * 1024 * 1024 })
 const askLimiter = new RateLimiter({ capacity: 10, perMinute: 10 })
 const uploadLimiter = new RateLimiter({ capacity: 20, perMinute: 30 })
+const speechLimiter = new RateLimiter({ capacity: 40, perMinute: 60 })
 
 function parseJson(value: unknown): unknown {
   try {
@@ -49,7 +51,28 @@ function validImage(image: unknown): image is File {
 
 const app = new Hono()
 
-app.get('/api/health', (c) => c.json({ ok: true, model: env.GEMMA_MODEL }))
+app.get('/api/health', (c) => c.json({ ok: true, model: env.GEMMA_MODEL, tts: ttsEnabled() }))
+
+/** Tutor voice: GET so an <audio> element can stream it directly. */
+app.get('/api/speech', async (c) => {
+  if (!ttsEnabled()) return c.json({ error: 'Tutor voice is not configured', code: 'tts_disabled' }, 503)
+  const wait = speechLimiter.take(clientKey(c))
+  if (wait) return rateLimited(c, wait)
+  const text = (c.req.query('text') ?? '').trim()
+  if (!text || text.length > MAX_SPEECH_CHARS) return c.json({ error: 'Invalid text', code: 'bad_request' }, 400)
+
+  try {
+    const audio = await synthesize(text, c.req.raw.signal)
+    // Same text → same audio, so the browser may reuse it (prefetch, replays).
+    const headers = { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'private, max-age=3600' }
+    // slice(): an ArrayBuffer-backed copy, which is what Response accepts.
+    return new Response(audio instanceof Uint8Array ? audio.slice() : audio, { headers })
+  } catch (err) {
+    const status = err instanceof SpeechError ? err.status : 502
+    console.warn('[speech]', err instanceof Error ? err.message : err)
+    return c.json({ error: 'Tutor voice unavailable', code: status === 429 ? 'busy' : 'upstream' }, 502)
+  }
+})
 
 /** Upload a frame ahead of the question; returns an id valid for ~2 minutes. */
 app.post('/api/frames', async (c) => {

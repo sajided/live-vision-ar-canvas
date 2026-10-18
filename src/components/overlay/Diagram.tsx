@@ -137,7 +137,8 @@ export function Diagram({ element, delay, onDismiss, placement, onMeasure, docke
       stepIndex={element.stepIndex}
       title={element.title}
     >
-      <div className="relative mx-auto mt-2 aspect-square" style={{ width: 'min(100%, 34dvh)' }}>
+      <div className="relative mx-auto mt-2 aspect-square" // Capped by screen height so a diagram fits the dock on short (landscape) screens.
+        style={{ width: 'min(100%, 34dvh, calc(100dvh - 18rem))' }}>
         <div className="absolute inset-4">
           <svg viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible" aria-hidden>
             {element.shapes.map((shape, i) => (
@@ -161,7 +162,7 @@ export function Diagram({ element, delay, onDismiss, placement, onMeasure, docke
         </div>
       </div>
       {element.caption && (
-        <FitTex latex={element.caption} size={15} className="mt-2" />
+        <FitTex latex={element.caption} size={19} className="mt-2" />
       )}
     </CardShell>
   )

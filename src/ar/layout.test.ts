@@ -8,7 +8,8 @@ describe('layoutCards', () => {
   it('places a lone card just below its anchor', () => {
     const rect = layoutCards([{ id: 'a', anchor: { x: 100, y: 200 }, height: 100 }], [], screen, options).get('a')!
     expect(rect.top).toBe(220)
-    expect(rect.left).toBe(80)
+    // Anchor-offset left edge, pulled in so the (wide) card stays inside the right gutter.
+    expect(rect.left).toBe(Math.min(80, screen.width - 12 - options.width))
   })
 
   it('keeps cards with nearby anchors from overlapping each other or beacons', () => {

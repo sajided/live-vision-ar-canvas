@@ -15,7 +15,7 @@ export function InfoCard({ element, delay, onDismiss, placement, onMeasure, dock
       stepIndex={element.stepIndex}
       title={element.title}
     >
-      <p className="mt-1.5 text-sm leading-relaxed font-medium">{element.body}</p>
+      <p className="mt-2 text-[17px] leading-relaxed font-medium">{element.body}</p>
     </CardShell>
   )
 }

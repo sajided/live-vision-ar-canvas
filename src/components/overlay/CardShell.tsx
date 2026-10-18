@@ -78,15 +78,15 @@ export function CardShell({
 function CardTitle({ stepIndex, title }: { stepIndex?: number; title?: ReactNode }) {
   if (title === undefined && stepIndex === undefined) return null
   return (
-    <div className="flex min-h-6 items-center gap-2 pr-7">
+    <div className="flex min-h-8 items-center gap-2.5 pr-8">
       {stepIndex !== undefined && (
         <span
-          className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-black shadow-md [text-shadow:none] ${RAINBOW_BG[(stepIndex - 1) % RAINBOW_BG.length]}`}
+          className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-black shadow-md [text-shadow:none] ${RAINBOW_BG[(stepIndex - 1) % RAINBOW_BG.length]}`}
         >
           {stepIndex}
         </span>
       )}
-      {title !== undefined && <h2 className="text-[15px] leading-snug font-bold">{title}</h2>}
+      {title !== undefined && <h2 className="text-[19px] leading-snug font-bold">{title}</h2>}
     </div>
   )
 }

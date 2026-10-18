@@ -30,6 +30,14 @@ Phones must use the `https://<lan-ip>` URL and accept the certificate, because c
 
 `captureFrame` encodes only what the viewfinder shows (the `object-fit: cover` crop), letterboxed into a 768×768 square. `frame.contentRect` records where that content sits inside the square (0–100). Use `imageToViewport` / `viewportToImage` from `src/camera/geometry.ts` to convert model coordinates to screen percentages.
 
+## Tutor voice (ElevenLabs)
+
+Gemma writes a spoken line (`say`) for each element, like a tutor talking through the problem. The app reveals one element at a time, drawing it while the line is spoken, and moves on only when both are done; subtitles show what's being said.
+
+- Add `ELEVENLABS_API_KEY` (and optionally `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL`, default `eleven_flash_v2_5`) to `.env`. The server proxies `GET /api/speech?text=…` to ElevenLabs' streaming TTS, so the key never reaches the browser, and caches audio in memory so replays aren't billed twice.
+- Without a key (or if a request fails) the browser's built-in speech synthesis is used.
+- The speaker button turns the voice off; everything then appears at once with the regular staggered animation.
+
 ## Phase 4: speed, reliability, feedback
 
 - **Early upload**: the frame is uploaded to `POST /api/frames` the moment it's frozen (kept in server memory for 2 minutes, never on disk); asking sends only text plus the `frameId`. Expired ids fall back to an inline upload.

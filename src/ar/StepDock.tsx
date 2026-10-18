@@ -39,7 +39,11 @@ function useRevealed(steps: CardElement[], delays: Record<string, number>): Set<
   }, [steps, delays])
   useEffect(() => {
     const timers = scheduled.current
-    return () => timers.forEach(clearTimeout)
+    return () => {
+      timers.forEach(clearTimeout)
+      // Forget them too, so a remount (or StrictMode's double effect run) schedules again.
+      timers.clear()
+    }
   }, [])
   return revealed
 }
@@ -102,8 +106,8 @@ export function StepDock({ steps, delays, project, screen, onDismissAll, onCurre
       className={`pointer-events-auto fixed z-20 ${
         side
           ? // Below the mute button, only as tall as the current step.
-            'top-[calc(max(0.5rem,env(safe-area-inset-top))+2.75rem)] right-3 max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-bottom))-9rem)] w-[min(320px,42vw)] overflow-hidden'
-          : 'inset-x-3 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+5.75rem)] mx-auto max-w-md'
+            'top-[calc(max(0.5rem,env(safe-area-inset-top))+2.75rem)] right-3 max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-bottom))-9rem)] w-[min(420px,46vw)] overflow-hidden'
+          : 'inset-x-3 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+5.75rem)] mx-auto max-w-xl'
       }`}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}

@@ -14,7 +14,7 @@ import { StepDock } from './StepDock'
 import type { ARElement, Point } from './schema'
 
 const CARD_OFFSET = 20
-const CARD_HEIGHT_ESTIMATE = 96
+const CARD_HEIGHT_ESTIMATE = 130
 // Keeps cards clear of the status pill and the control bar.
 const CARD_INSETS = { top: 64, right: 12, bottom: 128, left: 12 }
 const CIRCLE_CHORDS = 24

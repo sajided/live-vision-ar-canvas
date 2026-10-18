@@ -20,7 +20,9 @@ import { StatusPill } from './components/StatusPill'
 import { TranscriptBubble } from './components/TranscriptBubble'
 import { Viewfinder } from './components/Viewfinder'
 import { loadKatex } from './components/math/katexLoader'
-import { feedback } from './feedback/feedback'
+import { Subtitle } from './components/Subtitle'
+import { feedback, isMuted, setMuted } from './feedback/feedback'
+import { useTutor } from './tutor/useTutor'
 import { useOnline } from './hooks/useOnline'
 import { useToast } from './hooks/useToast'
 import { useViewport } from './hooks/useViewport'
@@ -37,6 +39,7 @@ const initialProvider = pick(PROVIDERS, params.get('provider'), 'gemma')
 const initialScenario = pick(MOCK_SCENARIOS, params.get('mock'), 'random')
 // Still-image mode replaces the camera, for desktop testing and e2e tests.
 const stillImageUrl = params.get('image')
+const NO_DELAYS: Record<string, number> = {}
 
 export default function App() {
   const camera = useCameraStream(!stillImageUrl)
@@ -62,11 +65,19 @@ export default function App() {
     [provider, scenario],
   )
   const annotations = useAnnotations(annotate)
+  const [muted, setMutedState] = useState(isMuted)
+  // With the voice on, the tutor reveals each element as it explains it.
+  const tutorOn = !muted
+  const tutor = useTutor(annotations.elements, annotations.status, tutorOn)
+  const visible = tutorOn ? annotations.visible.filter((el) => tutor.released.has(el.id)) : annotations.visible
+  const delays = tutorOn ? NO_DELAYS : annotations.delays
 
   // Audio/haptic cues as elements appear: a pop for the first, a tick per numbered step.
   const cuedRef = useRef(new Set<string>())
   const cueTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   useEffect(() => {
+    // The tutor's voice replaces the per-step cues.
+    if (tutorOn) return
     // A new request (or reset) cancels cues still pending from the previous answer.
     if (annotations.status === 'waiting' || annotations.status === 'idle') {
       cueTimersRef.current.forEach(clearTimeout)
@@ -81,7 +92,7 @@ export default function App() {
       const cue = i === 0 ? feedback.firstElement : feedback.step
       cueTimersRef.current.push(setTimeout(cue, (annotations.delays[el.id] ?? 0) * 1000))
     })
-  }, [annotations.elements, annotations.delays, annotations.status])
+  }, [annotations.elements, annotations.delays, annotations.status, tutorOn])
   useEffect(() => () => cueTimersRef.current.forEach(clearTimeout), [])
 
   // Warm the connection once the camera is up, so the first question doesn't pay for it.
@@ -194,8 +205,8 @@ export default function App() {
       {frame && (
         <OverlayRenderer
           elements={annotations.elements}
-          visible={annotations.visible}
-          delays={annotations.delays}
+          visible={visible}
+          delays={delays}
           frame={frame}
           screen={viewport}
           onDismiss={annotations.dismiss}
@@ -204,7 +215,14 @@ export default function App() {
       {!frame && <PermissionGate status={status} error={error} onRetry={restart} />}
       <ShutterFlash flashKey={frame?.capturedAt ?? null} />
       <ScanSweep active={frame !== null && annotations.status === 'waiting'} />
-      <MuteToggle />
+      <MuteToggle
+        muted={muted}
+        onChange={(value) => {
+          setMuted(value)
+          setMutedState(value)
+        }}
+      />
+      <Subtitle text={tutor.caption} />
       <StatusPill loading={annotations.status === 'waiting'} toast={toast} />
       <TranscriptBubble listening={speech.listening} transcript={speech.transcript} />
       <AnimatePresence>
