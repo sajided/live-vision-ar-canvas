@@ -1,10 +1,10 @@
 import katex from 'katex'
-import { ARElementSchema, type ARElement } from '../src/ar/schema'
-import type { AnnotationEvent } from '../src/ar/events'
-import type { GemmaMeta } from './gemma'
-import { upstreamErrorEvent } from './upstream'
-import { ElementStreamParser } from './elementStream'
-import { MODEL_GRID } from './prompt'
+import { ARElementSchema, type ARElement } from '../src/ar/schema.js'
+import type { AnnotationEvent } from '../src/ar/events.js'
+import type { GemmaMeta } from './gemma.js'
+import { upstreamErrorEvent } from './upstream.js'
+import { ElementStreamParser } from './elementStream.js'
+import { MODEL_GRID } from './prompt.js'
 
 const MAX_ELEMENTS = 24
 const MAX_ID_LENGTH = 40

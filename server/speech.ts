@@ -1,4 +1,4 @@
-import { env } from './env'
+import { env } from './env.js'
 
 const ELEVENLABS_URL = 'https://api.elevenlabs.io/v1/text-to-speech'
 export const MAX_SPEECH_CHARS = 300

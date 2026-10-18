@@ -6,9 +6,9 @@
  */
 import { readFile } from 'node:fs/promises'
 import { extname } from 'node:path'
-import { annotateStream } from '../annotate'
-import { env } from '../env'
-import { streamGemma } from '../gemma'
+import { annotateStream } from '../annotate.js'
+import { env } from '../env.js'
+import { streamGemma } from '../gemma.js'
 
 const [imagePath, query = 'What is this? Point out the key parts.'] = process.argv.slice(2)
 

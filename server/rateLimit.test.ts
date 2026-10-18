@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { RateLimiter } from './rateLimit'
+import { RateLimiter } from './rateLimit.js'
 
 describe('RateLimiter', () => {
   it('allows a burst, then reports the wait, then refills', () => {

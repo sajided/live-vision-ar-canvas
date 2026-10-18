@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isRetryableUpstream, retryBeforeFirstChunk, upstreamErrorEvent } from './upstream'
+import { isRetryableUpstream, retryBeforeFirstChunk, upstreamErrorEvent } from './upstream.js'
 
 const httpError = (status: number) => Object.assign(new Error(`HTTP ${status}`), { status })
 

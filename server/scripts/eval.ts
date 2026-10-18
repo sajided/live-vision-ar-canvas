@@ -13,12 +13,12 @@
  */
 import { readFile } from 'node:fs/promises'
 import { dirname, extname, resolve } from 'node:path'
-import type { Point } from '../../src/ar/schema'
-import type { ARElement } from '../../src/ar/schema'
-import { annotateStream } from '../annotate'
-import { env } from '../env'
-import { streamGemma, type GemmaMeta } from '../gemma'
-import { retryBeforeFirstChunk } from '../upstream'
+import type { Point } from '../../src/ar/schema.js'
+import type { ARElement } from '../../src/ar/schema.js'
+import { annotateStream } from '../annotate.js'
+import { env } from '../env.js'
+import { streamGemma, type GemmaMeta } from '../gemma.js'
+import { retryBeforeFirstChunk } from '../upstream.js'
 
 interface EvalCase {
   image: string

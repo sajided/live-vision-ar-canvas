@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { app } from './app'
-import { env } from './env'
-import { warmUp } from './gemma'
+import { app } from './app.js'
+import { env } from './env.js'
+import { warmUp } from './gemma.js'
 
 // Local / self-hosted Node server. On Vercel, api/index.ts serves the same app.
 

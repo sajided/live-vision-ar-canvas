@@ -1,4 +1,4 @@
-import type { PctRect } from '../src/camera/geometry'
+import type { PctRect } from '../src/camera/geometry.js'
 
 export const DEFAULT_QUERY = 'Solve this problem step by step.'
 

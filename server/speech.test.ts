@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AudioCache } from './speech'
+import { AudioCache } from './speech.js'
 
 const bytes = (n: number) => new Uint8Array(n)
 

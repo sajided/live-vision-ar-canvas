@@ -1,4 +1,4 @@
-import type { AnnotationEvent } from '../src/ar/events'
+import type { AnnotationEvent } from '../src/ar/events.js'
 
 type ErrorEvent = Extract<AnnotationEvent, { type: 'error' }>
 

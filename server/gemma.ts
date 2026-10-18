@@ -1,7 +1,7 @@
 import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig } from '@google/genai'
-import type { PctRect } from '../src/camera/geometry'
-import { env } from './env'
-import { buildSystemInstruction, buildUserPrompt } from './prompt'
+import type { PctRect } from '../src/camera/geometry.js'
+import { env } from './env.js'
+import { buildSystemInstruction, buildUserPrompt } from './prompt.js'
 
 let client: GoogleGenAI | null = null
 const ai = () => (client ??= new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }))

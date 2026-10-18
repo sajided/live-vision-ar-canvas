@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { AnnotationEvent } from '../src/ar/events'
+import type { AnnotationEvent } from '../src/ar/events.js'
 import {
   annotateStream,
   fromModelGrid,
@@ -10,8 +10,8 @@ import {
   repairJsonEscapes,
   repairLatex,
   repairLatexFields,
-} from './annotate'
-import type { ARElement } from '../src/ar/schema'
+} from './annotate.js'
+import type { ARElement } from '../src/ar/schema.js'
 
 async function* chunked(text: string, size = 9) {
   for (let i = 0; i < text.length; i += size) yield text.slice(i, i + size)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ElementStreamParser } from './elementStream'
+import { ElementStreamParser } from './elementStream.js'
 
 const answer = JSON.stringify({
   elements: [

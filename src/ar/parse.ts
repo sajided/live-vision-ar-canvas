@@ -1,4 +1,4 @@
-import { ARResponseSchema, type ARResponse } from './schema'
+import { ARResponseSchema, type ARResponse } from './schema.js'
 
 export type ParseResult = { ok: true; data: ARResponse } | { ok: false; error: string }
 
