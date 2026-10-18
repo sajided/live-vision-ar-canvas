@@ -1,5 +1,7 @@
 # StepProof
 
+**Live demo:** [live-vision-ar-canvas.vercel.app](https://live-vision-ar-canvas.vercel.app/), best on a phone. Allow camera access, point at a math problem and ask.
+
 Mobile-first AR **math tutor** (see `product_requirement_document.md`). Point the camera at a math problem, ask by voice (hold the mic) or by typing after the shutter, and Gemma's worked solution streams in over the photo: geometry traced on the figure (polygons, circles, angle marks, length labels), step-by-step formulas (KaTeX), and mini whiteboard diagrams for things not in view.
 
 ## Develop

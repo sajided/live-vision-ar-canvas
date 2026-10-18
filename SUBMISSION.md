@@ -123,6 +123,8 @@ We're proudest that the answer happens on the page. A tutor's pen traces the stu
 
 ## Built with and links
 
+**Live demo:** [live-vision-ar-canvas.vercel.app](https://live-vision-ar-canvas.vercel.app/), best on a phone.
+
 **Code:** [github.com/sajided/live-vision-ar-canvas](https://github.com/sajided/live-vision-ar-canvas), MIT license.
 
 | Area | Technologies |
